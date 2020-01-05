@@ -10,7 +10,8 @@ parameters to be set :
 > clientPort=2181
 
 > zkServer.sh start  
--- this is how you start your zookeeper server.
+-- this is how you start your zookeeper server when you have zookeeper installed separately
+-- if youre using th e
 
 ** A zookeeper server is called ensemble, and you should have odd numbers of nodes in an ensemble.
 
@@ -28,3 +29,7 @@ Verifying the existing topic::
 -- for standalone kafka, this will suffice. But for a Kafka cluster to be set up, we would need to set many config parameters.
 
 *** broker.id ==> Each broker should have unique value for this within a single kafka cluster. By default it is set to 0. 
+
+*** num.partitions ==> The num.partitions parameter determines how many partitions a new topic is created with, primarily when automatic 
+topic creation is enabled (which is the default setting). This parameter defaults to one partition. Keep in mind that the number of
+partitions for a topic can only be increased, never decreased.
