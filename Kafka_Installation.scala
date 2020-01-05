@@ -11,7 +11,8 @@ parameters to be set :
 
 > zkServer.sh start  
 -- this is how you start your zookeeper server when you have zookeeper installed separately
--- if youre using th e
+-- if youre using the zookeeper script comes with Kafka itself, you would do this:
+zookeeper-server-start.sh config/zookeeper.properties
 
 ** A zookeeper server is called ensemble, and you should have odd numbers of nodes in an ensemble.
 
@@ -21,10 +22,17 @@ Start the kafka broker:
 > kafka-server-start.sh -daemon /usr/local/kafka/config/server.properties
 
 Creating and verifying a topic::
-> kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test
+for older version of kafka
+> kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic test   
+for newer version of kafka
+> kafka-topics.sh --create --bootstrap-server localhost:2181 --replication-factor 1 --partitions --topic test
 
 Verifying the existing topic::
 > kafka-topics.sh --zookeeper localhost:2181 --describe --topic test 
+
+Listing out all the topics created ::
+======================================
+> bin/kafka-topics.sh --list --bootstrap-server localhost:9092
 
 -- for standalone kafka, this will suffice. But for a Kafka cluster to be set up, we would need to set many config parameters.
 
@@ -33,3 +41,5 @@ Verifying the existing topic::
 *** num.partitions ==> The num.partitions parameter determines how many partitions a new topic is created with, primarily when automatic 
 topic creation is enabled (which is the default setting). This parameter defaults to one partition. Keep in mind that the number of
 partitions for a topic can only be increased, never decreased.
+
+
