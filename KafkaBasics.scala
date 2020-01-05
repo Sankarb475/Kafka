@@ -72,6 +72,8 @@ So the load will be distributed among these consumer instances.
 existing consumer group to scale the reading and processing of messages from the topics, so each additional consumer in a group will 
 only get a subset of the messages.
 
+*** while paritiions speed up the processing at consumer side, it violates message ordering guarantees
+
 Producer 
 =============
 pulishes data to kafka topics. The producer is responsible for assigning a particular record to a partition on a topic.
