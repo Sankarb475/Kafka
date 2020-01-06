@@ -97,7 +97,66 @@ This depends on the following properties:
 2) maximum throughput you expect to achieve when consuming from a single partition
 ==> You will always have, at most, one consumer reading from a partition, so if you know that your slower consumer writes the data to 
 a database and this database never handles more than 50 MB per second from each thread writing to it, then you know you are limited to
-60MB throughput when consuming from a partition.
+50 MB throughput when consuming from a partition.
 3) Avoid overestimating, as each partition uses memory and other resources on the broker and will increase the time for leader elections
+
+*** If you have some estimate regarding the target throughput of the topic and the expected throughput of the consumers, you can divide 
+the target throughput by the expected consumer throughput and derive the number of partitions this way. So
+if I want to be able to write and read 1 GB/sec from a topic, and I know each consumer can only process 50 MB/s, then I know I need
+at least 20 partitions. This way, I can have 20 consumers reading from the topic and achieve 1 GB/sec.
+ 
+partitions = target throughput of the topic / expected consumer throughput 
+
+--if you do not have those values handy, it is advisable to have a partition that limits the size of the partition on the disk to less
+than 6 GB per day of retention often gives satisfactory results.
+
+** You measure the throughout that you can achieve on a single partition for production (call it p) and consumption (call it c). Let’s 
+say your target throughput is t. Then you need to have at least max(t/p, t/c) partitions.
+
+======================================================================================================================================
+8) Adverse effect of having more partitions?
+==>
+Although more partition lead to higher throughpu, thses are the adverse effects:
+1) More Partitions Requires More Open File Handles
+2) More Partitions May Increase Unavailability
+3) More Partitions May Increase End-to-end Latency
+4) More Partitions May Require More Memory In the Client
+
+======================================================================================================================================
+9) How to increase the maximum size of a record in Kafka?
+==>
+By default maximum size is 1 MB.
+
+You need to adjust three (or four) properties:
+Broker: you need to increase properties message.max.bytes and replica.fetch.max.bytes. 
+        condition to be satisfied :
+            message.max.bytes <= replica.fetch.max.bytes
+        -- if replica.fetch.max.bytes is less than message.max.bytes then although producer will be able to write to the leader, leader
+           will not be able to replicate the messages to replicas.
+Producer: Increase max.request.size to send the larger message.
+Consumer: Increase max.partition.fetch.bytes to receive larger messages.
+
+-- we need to add the broker properties in server.properties.
+
+======================================================================================================================================
+10) what are the uses of Kafka keys?
+==>
+Keys are mostly useful/necessary If you require that messages with the same key (for instance, a unique id) are always seen in the 
+correct order, attaching a key to messages will ensure messages with the same key always go to the same partition in a topic. Kafka 
+guarantees order within a partition, but not across partitions in a topic, so alternatively not providing a key - which will result in 
+round-robin distribution across partitions - will not maintain such order.
+
+Keys are used to determine the partition within a log to which a message get's appended to. While the value is the actual payload of 
+the message.
+
+Specifying the key so that all messages on the same key go to the same partition is very important for proper ordering of message 
+processing if you will have multiple consumers in a consumer group on a topic.
+Without a key, two messages on the same key could go to different partitions and be processed by different consumers in the group out 
+of order.
+
+
+
+
+
 
 
