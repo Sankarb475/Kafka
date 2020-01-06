@@ -13,8 +13,13 @@ Kafka has this alter statement which lets you do that::
 ==>
 If you set this property to true in our server.properties file before starting your kafka broker:
 -- auto.create.topics.enable
-kafka will automatically create a topic when you send a message to a non existing topic. The partition number will be defined by the 
-default settings in this same file.
+kafka will automatically create a topic:
+• When a producer starts writing messages to the topic
+• When a consumer starts reading messages from the topic
+• When any client requests metadata for the topic
+
+send a message to a non existing topic. 
+The partition number will be defined by the default settings in this same file.
 num.partitions ==> this parameter will define the number of partitions to be created.
 
 ======================================================================================================================================
@@ -84,5 +89,15 @@ ProcessId
 6016
 > taskkill /pid 6016 /f
 
+======================================================================================================================================
+7) How to choose the number of partitions?
+==>
+This depends on the following properties:
+1) throughput you expect to achieve for the topic
+2) maximum throughput you expect to achieve when consuming from a single partition
+==> You will always have, at most, one consumer reading from a partition, so if you know that your slower consumer writes the data to 
+a database and this database never handles more than 50 MB per second from each thread writing to it, then you know you are limited to
+60MB throughput when consuming from a partition.
+3) Avoid overestimating, as each partition uses memory and other resources on the broker and will increase the time for leader elections
 
 
