@@ -177,6 +177,10 @@ We can partition size using the below command :
 -- We will need to develop a script that will run above script for fetching current size of topic, and take conditional action based 
 on the size.
 
+======================================================================================================================================
+13) When you might end up processing same records more than once?
+==>
+
 
 
 
