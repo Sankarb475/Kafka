@@ -144,9 +144,40 @@ each in its own thread.
 
 Consumer Configurations
 ===============================================
-fetch.min.bytes ==> The minimum size of the batch 
- 
+fetch.min.bytes ==> 
+The minimum size of the batch requires for the broker to be able to sent it out to the Consumer. If the combined size of the messages
+doesnt cross this value, broker will wait for additional records to come.
+
+fetch.max.wait.ms ==> 500 ms
+Tells the broker how long to wait before it sends out one batch to the Consumer. By default, Kafka will wait up to 500 ms.
+
+*** so between the above two parameter broker waits for any one of them to complete, so that it can send out the batch. 
+If you set fetch.max.wait.ms to 100 ms and fetch.min.bytes to 1 MB, Kafka will recieve a fetch request from the consumer and will 
+respond with data either when it has 1 MB of data to return or after 100 ms, whichever happens first.
+
+max.partition.fetch.bytes ==> 1 MB
+This property controls the maximum number of bytes the server will return per partition. This is the maximum size of a single record 
+which can be sent over the network to the consumer.
+
+session.timeout.ms ==> 3 seconds
+The amount of time a consumer can be out of contact with the brokers (no heartbeats sent) while still considered alive defaults to 3 
+seconds.
+
+heartbeat.interval.ms ==> 
+controls how frequently the KafkaConsumer poll() method will send a heartbeat to the group coordinator.
+
+*** if heartbeat.interval.ms > session.timeout.ms ==> then the broker will always assume that the consumer is dead. So this is a MUST :
+heartbeat.interval.ms < session.timeout.ms
+
+auto.offset.reset ==> "latest"
+The default is “latest,” which means that lacking a valid offset, the consumer will start reading from the newest records (records that
+were written after the consumer started running). The alternative is “earliest,” which means that lacking a valid offset, the consumer 
+will read all the data in the partition, starting from the very beginning.
 
 
+enable.auto.commit => false
+Whether the offsets are automatically updated. If enabled each "auto.commit.interval.ms" interval, the offsets will be updated.
 
+max.poll.records ==> 
+This controls the maximum number of records that a single call to poll() will return.
 
