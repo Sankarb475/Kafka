@@ -154,6 +154,29 @@ processing if you will have multiple consumers in a consumer group on a topic.
 Without a key, two messages on the same key could go to different partitions and be processed by different consumers in the group out 
 of order.
 
+======================================================================================================================================
+11) What will happen if I try to send a record with the producer api to a broker and the log of the topic got full before the retention 
+period? Will my message get dropped? Or will kafka free some space from the old messages and add mine?
+==>
+By default kafka has no size limit to its partition. It has a parameter 
+log.retention.bytes (log.retention.bytes: The maximum size of the log before deleting it), the value of which is -1 by default, which
+means theres no size limit to it.
+
+But, if you have put a size limit to it, then Kafka has another property (values - delete/compact)
+cleanup.policy (The default cleanup policy for segments beyond the retention window) - by default "delete"
+-- this means "The delete policy will discard old segments when their retention time or size limit has been reached."
+
+======================================================================================================================================
+12) How can I know if a topic is getting full and logs are being deleted before being consumed? Is there a way to monitor or expose a 
+metric when a topic is getting full?
+==>
+We can partition size using the below command :
+
+> /bin/kafka-log-dirs.sh --describe --bootstrap-server : --topic-list
+
+-- We will need to develop a script that will run above script for fetching current size of topic, and take conditional action based 
+on the size.
+
 
 
 
