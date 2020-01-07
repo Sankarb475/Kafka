@@ -181,3 +181,144 @@ Whether the offsets are automatically updated. If enabled each "auto.commit.inte
 max.poll.records ==> 
 This controls the maximum number of records that a single call to poll() will return.
 
+Commits and Offsets
+==============================================
+One of Kafka’s unique characteristics is that it does not track acknowledgments from consumers the way many JMS queues do. Instead, it 
+allows consumers to use Kafka to track their position (offset) in each partition.
+
+We call the action of updating the current position in the partition a commit.
+
+How does a consumer commit an offset? 
+It produces a message to Kafka, to a special __consumer_offsets topic, with the committed offset for each partition. As long as all your
+consumers are up, running, and churning away, this will have no impact. However, if a consumer crashes or a new consumer joins the 
+consumer group, this will trigger a rebalance. After a rebalance, each consumer may be assigned a new set of partitions than the one it 
+processed before. In order to know where to pick up the work, the consumer will read the latest committed offset of each partition and 
+continue from there.
+If the committed offset is smaller than the offset of the last message the client processed, the messages between the last processed 
+offset and the committed offset will be processed twice.
+
+Automatic Commit ==>
+The easiest way to commit offsets is to allow the consumer to do it for you. If you configure enable.auto.commit=true, then every five 
+seconds the consumer willcommit the largest offset your client received from poll(). The five-second interval is the default and is 
+controlled by setting auto.commit.interval.ms. Just like everything else in the consumer, the automatic commits are driven by the poll 
+loop. Whenever you poll, the consumer checks if it is time to commit, and if it is, it will commit the offsets it returned in the last 
+poll.
+
+Consider that, by default, automatic commits occur every five seconds. Suppose that we are three seconds after the most recent commit 
+and a rebalance is triggered. After the rebalancing, all consumers will start consuming from the last offset committed. In this case, 
+the offset is three seconds old, so all the events that arrived in those three seconds will be processed twice. It is possible to 
+configure the commit interval to commit more frequently and reduce the window in which records will be duplicated, but it is impossible 
+to completely eliminate them.
+
+Commit Current Offset ==> 
+commitSync 
+=========================================
+By setting auto.commit.offset=false, offsets will only be committed when the application explicitly chooses to do so. The simplest and 
+most reliable of the commit APIs is commitSync(). This API will commit the latest offset returned by poll() and return once the offset 
+is committed, throwing an exception if commit fails for some reason.
+
+
+while (true) {
+  val record = consumer.poll(1000).asScala
+  for (data <- record.iterator)
+    println(data.value())
+}
+try{
+    consumer.commitSync()   
+}
+catch{
+    case IOException ==> {
+        print("IO error")
+    }
+}
+
+-- Once we are done “processing” all the records in the current batch, we call commitSync to commit the last offset in the batch, before 
+polling for additional messages.
+commitSync retries committing as long as there is no error that can’t be recovered. If this happens, there is not much we can do except 
+log an error.
+
+Asynchronous Commit ::
+==============================
+One problem with commitSync is that until unless processing is done, the application is blocked, also if broker doesnt respond to the 
+commit request application is blocked.
+Another option is the asynchronous commit API. Instead of waiting for the broker to respond to a commit, we just send the request and 
+continue on.
+
+while (true) {
+  val record = consumer.poll(1000).asScala
+  for (data <- record.iterator)
+    println(data.value())
+  consumer.commitAsync()                            //Commit the last offset and carry on.
+}
+
+-- during a rebalance, it might cause a bigger rebalance.
+
+Combining a sync and async commit 
+==========================================
+
+try{
+    while (true) {
+      val record = consumer.poll(1000).asScala
+      for (data <- record.iterator)
+        println(data.value())
+       consumer.commitAsync()
+    }
+}
+catch{
+    case .....
+    ....
+}
+finally {
+    try {
+        consumer.commitSync();
+    } finally {
+        consumer.close();
+    }
+}
+
+While everything is fine, we use commitAsync. It is faster, and if one commit fails, the next commit will serve as a retry.
+But if we are closing, there is no “next commit.” We call commitSync(), because it will retry until it succeeds or suffers unrecoverable
+failure.
+
+Commit Specified Offset
+================================
+sync and aync both lets you commit when one complete batch is done processing. What if you want to commit in between, because your batch 
+size is big and you dont want to reprocess the whole batch if a rebalance is triggered in between.
+
+int count = 0;
+while (true) {
+ConsumerRecords<String, String> records = consumer.poll(100);
+for (ConsumerRecord<String, String> record : records)
+{
+System.out.printf("topic = %s, partition = %s, offset = %d,
+customer = %s, country = %s\n",
+record.topic(), record.partition(), record.offset(),
+record.key(), record.value());
+currentOffsets.put(new TopicPartition(record.topic(),
+record.partition()), new
+OffsetAndMetadata(record.offset()+1, "no metadata"));
+if (count % 1000 == 0)
+consumer.commitAsync(currentOffsets, null);
+count++;
+}
+}
+ 
+Consuming Records with Specific Offsets
+====================================================
+This has to be updated/populated with Scala code.
+
+
+
+
+
+Standalone Consumer: Why and How to Use a Consumer Without a Group
+========================================================================================
+Sometimes you know you have a single consumer that always needs to read data from all the partitions in a topic, or from a specific 
+partition in a topic. In this case, there is no reason for groups or rebalances— just assign the consumer-specific topic and/or 
+partitions, consume messages, and commit offsets on occasion.
+
+When you know exactly which partitions the consumer should read, you don’t subscribe to a topic—instead, you assign yourself a few 
+partitions. A consumer can either subscribe to topics (and be part of a consumer group), or assign itself partitions, but not both at 
+the same time.
+
+The scala code for this has to be found out and populated here.
