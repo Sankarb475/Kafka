@@ -5,6 +5,9 @@ Kafka broker is a node(kafka server) on the Kafka cluster, its use is to persist
 A Kafka Producer pushes the message into the message container called the Kafka Topic. 
 Whereas a Kafka Consumer pulls the message from the Kafka Topic.
 
+Replication factor :: 
+for a replication factor of N, you will need at least N brokers and you will store N copies of the data, meaning you will need N times 
+as much disk space. But it allows you to lose N-1 brokers while still being able to read and write data to the topic reliably.
 
 Kafka Learning
 ========================================================================================================================
