@@ -124,3 +124,23 @@ RETENTIONs are two types:
 *** We can have multiple Kafka clusters as input grows in multiple data centers. Replication mechanism between different data centers 
 are handled by a tool called MirroMaker. MirrorMaker is simply a Kafka consumer and producer, linked together with a queue. Messages 
 are consumed from one Kafka cluster and produced for another.
+
+
+Replication fundamentals
+==================================================
+A partition is stored on a single disk. Kafka guarantees order of events within a partition and a partition can be either online 
+(available) or offline (unavailable). Each partition can have multiple replicas, one of which is a designated leader. All events are 
+produced to and consumed from the leader replica. Other replicas just need to stay in sync with the leader and replicate all the recent
+events on time. If the leader becomes unavailable, one of the in-sync replicas becomes the new leader.
+
+A replica is considered in-sync if it is the leader for a partition, or if it is a follower that:
+1) Has an active session with Zookeeper—meaning, it sent a heartbeat to Zookeeper in the last 6 seconds (configurable).
+2) Fetched messages from the leader in the last 10 seconds (configurable).
+3) Fetched the most recent messages from the leader in the last 10 seconds. That is, it isn’t enough that the follower is still getting
+messages from the leader; it must have almost no lag.
+
+An in-sync replica that is slightly behind can slow down producers and consumers, since they wait for all the in-sync replicas to get 
+the message before it is committed. Once a replica falls out of sync, we no longer wait for it to get messages. It is still behind, but 
+now there is no performance impact. The catch is that with fewer in-sync replicas, the effective replication factor of the partition is
+lower and therefore there is a higher risk for downtime or data loss.
+
