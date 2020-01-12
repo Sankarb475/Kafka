@@ -18,7 +18,7 @@ zookeeper-server-start.sh config/zookeeper.properties
 
 Kafka Broker
 ===============================
-The nodes which run as kafka brokers has to have these config parameters updated:
+The nodes which run as kafka brokers has to have these config parameters updated (in server.properties file):
 
 broker.id = <unique integer within a cluster>
 zookeeper.conect = <IP_Address1>:<port = 2181>,<IP_Adress2>:<port = 2181>,.......
