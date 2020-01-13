@@ -1,3 +1,5 @@
+Kafka is a distriubted, fault tolerant stremaing platform, follows pub/sub messaging pattern.
+
 Kafka ==> "distributed commit log"
 Message/record ==> An array of bytes.
 
