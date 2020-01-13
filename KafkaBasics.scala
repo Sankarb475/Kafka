@@ -151,3 +151,18 @@ the message before it is committed. Once a replica falls out of sync, we no long
 now there is no performance impact. The catch is that with fewer in-sync replicas, the effective replication factor of the partition is
 lower and therefore there is a higher risk for downtime or data loss.
 
+
+Leader of a partition ==> Out of all the replica partitions residing in different servers in a kafka cluster, one server owns that  
+partition. That is all the writes and reads to and from that partition is accommodated by that server only, others are in stand
+by mode and they are called the followers. If the leader fails, one of the follower which is most in sync with the leader partition will
+be taking over as the leader.
+
+Group Coordinator ==> Out of all the servers/brokers in a kafka cluster, one server will be the group coordinator for each consumer 
+group. For each consumer group there will be one kafka broker acting as the group coordinator of that consumer group. All the consumer 
+instances will be sending periodic heartbeats to this group coordinator. This broker will be responsible for rebalancing and selecting 
+the leader of a partition.      
+
+Cluster controller ==> Out of all the servers in a kafka cluster, one cluster will be the cluster controller, responsible for 
+administrative work in the cluster - assigning partitions to the brokers and monitoring the brokers.
+
+
