@@ -132,3 +132,8 @@ When the key is null and the default partitioner is used, the record will be sen
 random.
 
 
+** Starting a kafka producer in CLI ::
+
+kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic my-topic
+
+
