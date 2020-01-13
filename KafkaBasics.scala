@@ -1,4 +1,6 @@
-Kafka is a distriubted, fault tolerant stremaing platform, follows pub/sub messaging pattern.
+Kafka is a distriubted, fault tolerant stremaing platform, follows pub/sub messaging pattern- that is message producer applications 
+publish data to kafka, and message consumer applications consume the data from Kafka. This allows multiple producers to produce to a 
+single topic, and similarly multiple consumers can consume from a same topic.
 
 Kafka ==> "distributed commit log"
 Message/record ==> An array of bytes.
