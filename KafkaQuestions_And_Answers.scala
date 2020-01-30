@@ -192,7 +192,17 @@ consumer group, this will trigger a rebalance. After a rebalance, each consumer 
 processed before. In order to know where to pick up the work, the consumer will read the latest committed offset of each partition and 
 continue from there.
 
+======================================================================================================================================
+15) How to only subscribe to a particular partition of a topic and not the whole topic?
+How to force a consumer to read a specific partition in kafka?
+==>
+Using "assign" rather than using "subscribe"
 
+>>> # manually assign the partition list for the consumer
+>>> from kafka import TopicPartition
+>>> consumer = KafkaConsumer(bootstrap_servers='localhost:1234')
+>>> consumer.assign([TopicPartition('foobar', 2)])
+>>> msg = next(consumer)
 
-
+-- subscriber needs group id while assign doesnt
 
