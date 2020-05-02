@@ -77,5 +77,35 @@ Kafka Consumer and Producer set up::
 metadata.broker.list=PUBLIC_IP_ADDRESS_OF_FIRST_KAFKA_BROKER:9092, PUBLIC_IP_ADDRESS_OF_SECOND_KAFKA_BROKER:9092
 
 
+Running Kafka in windows local 
+=============================================
+Step 1
+========
+First create a directory inside kafka/ as "data" and a directory "zookeeper" inside "data"
+so you will end up having "/Kafka/data/zookeeper"
+
+Then we need to set a parameter inside Kafka/config/zookeeper.properties.
+dataDir=\Kafka\data\zookeeper
+
+Step 2
+========
+Run the lightweight zookeeper server residing inside "Kafka/bin/windows/"
+
+Open one CMD and run this below command:
+>> .\bin\windows\zookeeper-server-start.bat config\zookeeper.properties
+
+
+Step 3
+========
+Create another directory in "kafka" inside "/Kafka/data/"
+and we need to update this parameter in server.properties
+
+log.dirs=D:\App\kafka_2.11-2.4.1\data\kafka
+
+Open another CMD and run the kafka broker using this below command:
+>>.\bin\windows\kafka-server-start.bat .\config\server.properties
+
+
+
 
 
