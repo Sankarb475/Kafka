@@ -170,3 +170,60 @@ Cluster controller ==> Out of all the servers in a kafka cluster, one cluster wi
 administrative work in the cluster - assigning partitions to the brokers and monitoring the brokers.
 
 
+Kafka Segment
+==============================
+Each partition is sub-divided into multiple segments. 
+A segment is simply a collection of messages of a partition. Instead of storing all the messages of a partition in a single file 
+Kafka splits them into chunks called segments.
+
+-- it makes purging data easy. As previously introduced partition is immutable from a consumer perspective. But Kafka can still remove 
+the messages based on the “Retention policy” of the topic. Deleting segments is much simpler than deleting things from a single file, 
+especially when a producer might be pushing data into it
+
+-- Each segment file has segment.log, segment.index and segment.timeindex files.
+
+-- Kafka always writes the messages into these segment files under a partition. There is always an active segment to which Kafka writes 
+to. Once the segment’s size limit is reached, a new segment file is created and that becomes the newly active segment.
+
+-- Each segment file is created with the offset of the first message as its file name.
+So the name of the first segment of a partition would be 0, and then the last offset value stores in segment 0 + 1 wil be the name of
+the second segment file.
+
+-- you can see there are three partitios in below topic details, the ".log" file actually stores your data which is a segment name 
+
+$ ls -lh freblogg*
+freblogg-0:
+total 20M
+- freblogg 197121 10M Aug  5 08:26 00000000000000000000.index
+- freblogg 197121   0 Aug  5 08:26 00000000000000000000.log
+- freblogg 197121 10M Aug  5 08:26 00000000000000000000.timeindex
+- freblogg 197121   0 Aug  5 08:26 leader-epoch-checkpoint
+
+freblogg-1:
+total 21M
+- freblogg 197121 10M Aug  5 08:26 00000000000000000000.index
+- freblogg 197121  68 Aug  5 10:15 00000000000000000000.log
+- freblogg 197121 10M Aug  5 08:26 00000000000000000000.timeindex
+- freblogg 197121  11 Aug  5 10:15 leader-epoch-checkpoint
+
+freblogg-2:
+total 21M
+- freblogg 197121 10M Aug  5 08:26 00000000000000000000.index
+- freblogg 197121  79 Aug  5 09:59 00000000000000000000.log
+- freblogg 197121 10M Aug  5 08:26 00000000000000000000.timeindex
+- freblogg 197121  11 Aug  5 09:59 leader-epoch-checkpoint
+
+For 2nd segment - the name of the 2nd segment will be the latest offset value number 
+
+freblogg-2
+|-- 00.index
+|-- 00.log
+|-- 00.timeindex
+|-- 03.index
+|-- 03.log
+|-- 03.timeindex
+
+-- now we have two segments, and so are 2 index and timeindex files 
+-- so we know that offset value from 0 to 2 belongs to first segment since the name of the second segment is 3.
+
+-- .index file stores the offsets and physical position of the message in the log file.
