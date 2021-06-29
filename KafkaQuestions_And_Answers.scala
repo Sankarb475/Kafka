@@ -1,3 +1,21 @@
+What is Kafka Schema Registry?
+=>
+Schema registry stores the schema of the data being pushed into Kafka by producer. It stores the schema in Avro format.
+-- It offers a RESTful interface for managing Avro schemas.
+-- It permits for the storage of a history of schemas that are versioned.
+-- Moreover, it supports checking schema compatibility for Kafka.
+-- Using Avro Schema, we can configure compatibility settings to support the evolution of Kafka schemas
+
+PRODUCER -> SENDS AVRO CONTEN -> KAFKA -> READS AVRO CONTENT -> CONSUMER
+PRODUCER -> SENDS SCHEMA -> SCHEMA REGISTRY -> GET SCHEMA -> KAFKA CONSUMER
+
+The consumer’s schema could differ from the producer’s. On defining a consumer schema, it is what the consumer is expecting the record/message to conform to.
+
+As the check is performed, the payload transformation happens via Avro Schema Evolution, with the Schema Registry, if the two schemas don’t match but are compatible. 
+In addition, Kafka records can have a key and a value and both can have a schema.
+
+
+======================================================================================================================================
 1) How to increase the number of partitions of a topic?
 ==>
 Kafka only lets you increase the number of partitions, you cannot decrease it.
